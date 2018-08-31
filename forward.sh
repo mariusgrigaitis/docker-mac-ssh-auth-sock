@@ -46,7 +46,7 @@ fi
 # meaning it could be very "unreliable"
 COMMAND="mkdir -p /ssh-auth-sock-hack && mount -o bind /ssh-auth-sock-hack $(dirname $SSH_AUTH_SOCK) && rmdir $SSH_AUTH_SOCK"
 
-echo ctr -n services.linuxkit tasks exec --exec-id 'ssh-$(hostname)-$$' docker sh -c \"$COMMAND\" > $TTY_FILE
+echo ctr -n services.linuxkit tasks exec --exec-id 'ssh-$(hostname)-$$' '$(ctr -n services.linuxkit tasks ls -q | grep docker)' sh -c \"$COMMAND\" > $TTY_FILE
 # give some time for command to execute.
 sleep 1
 
@@ -61,4 +61,4 @@ echo "Starting socket proxy"
 #
 # This is not really reliable because forwarding input/output over stdin/stdout does not allow for multiple communications
 # at the same time. It fails when doing multiple connections to $SSH_AUTH_SOCK at the same time.
-exec socat "EXEC:\"docker run -i --rm -v $(dirname $SSH_AUTH_SOCK):$(dirname $SSH_AUTH_SOCK) alpine/socat UNIX-LISTEN:$SSH_AUTH_SOCK,reuseaddr,fork,unlink-early -\"" "EXEC:\"socat - UNIX:${SSH_AUTH_SOCK}\""
+exec socat "EXEC:\"docker run -i --rm -v $(dirname $SSH_AUTH_SOCK):$(dirname $SSH_AUTH_SOCK) alpine/socat UNIX-LISTEN:$SSH_AUTH_SOCK,reuseaddr,fork -\"" "EXEC:\"socat - UNIX:${SSH_AUTH_SOCK}\""
