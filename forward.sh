@@ -21,10 +21,16 @@ if ! test -S ${SSH_AUTH_SOCK}; then
 fi
 
 TTY_FILE=~/Library/Containers/com.docker.docker/Data/com.docker.driver.amd64-linux/tty
+TTY_FILE_NEW=~/Library/Containers/com.docker.docker/Data/vms/0/tty
 
 if ! test -c $TTY_FILE; then
-    echo "$TTY_FILE is not available. Docker for Mac setup has changed?"
-    exit 1
+    echo "$TTY_FILE is not available. Docker for Mac setup has changed? Trying newer file..."
+    if ! test -c $TTY_FILE_NEW; then
+        echo "$TTY_FILE_NEW is not available. Docker for Mac setup has changed? Giving up."
+        exit 1
+    else
+        TTY_FILE=$TTY_FILE_NEW
+    fi
 fi
 
 # This is where the UGLY hack starts
